@@ -1,0 +1,518 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>WMS - Панель менеджера</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #e8edf2;
+            --bg-secondary: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #5a6e7c;
+            --text-muted: #8aa0b0;
+            --border: #d0d7de;
+            --header: #1a2a3a;
+            --sidebar: #ffffff;
+            --sidebar-hover: #f0f3f8;
+            --input: #f5f7fa;
+            --input-border: #c0c8d0;
+            --primary: #2c5f8a;
+            --primary-hover: #1a4a6f;
+            --success: #2e7d64;
+            --danger: #c0392b;
+            --warning: #e67e22;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0b0;
+            --text-muted: #707080;
+            --border: #2a2a4a;
+            --header: #0f0f23;
+            --sidebar: #1a1a2e;
+            --sidebar-hover: #2a2a4a;
+            --input: #1e1e3a;
+            --input-border: #3a3a5a;
+            --primary: #4a8abf;
+            --primary-hover: #5a9adf;
+            --success: #2e7d64;
+            --danger: #c0392b;
+            --warning: #e67e22;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .header {
+            background: var(--header);
+            color: white;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+            .logo span {
+                font-weight: 300;
+                color: #8aa0b0;
+            }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .theme-btn, .refresh-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .user-name {
+            font-size: 14px;
+        }
+
+        .user-role {
+            background: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid #4a6a7a;
+            padding: 6px 16px;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            width: 240px;
+            height: calc(100% - 56px);
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 16px 0;
+        }
+
+            .sidebar-menu li {
+                padding: 12px 20px;
+                margin: 4px 12px;
+                cursor: pointer;
+                font-size: 14px;
+                color: var(--text-secondary);
+                border-radius: 8px;
+            }
+
+                .sidebar-menu li:hover {
+                    background: var(--sidebar-hover);
+                    color: var(--primary);
+                }
+
+                .sidebar-menu li.active {
+                    background: var(--primary);
+                    color: white;
+                }
+
+        .main-content {
+            margin-left: 240px;
+            margin-top: 56px;
+            padding: 24px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+            .stat-card h3 {
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                margin-bottom: 8px;
+            }
+
+            .stat-card .value {
+                font-size: 32px;
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+        .section {
+            display: none;
+        }
+
+            .section.active {
+                display: block;
+            }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            background: var(--sidebar-hover);
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .message {
+            position: fixed;
+            top: 70px;
+            right: 24px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: none;
+            z-index: 1000;
+        }
+
+            .message.success {
+                background: var(--success);
+                color: white;
+            }
+
+            .message.error {
+                background: var(--danger);
+                color: white;
+            }
+
+            .message.info {
+                background: var(--primary);
+                color: white;
+            }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+        }
+
+        .status-new {
+            background: rgba(44,95,138,0.15);
+            color: var(--primary);
+        }
+
+        .status-picking {
+            background: rgba(230,126,34,0.15);
+            color: var(--warning);
+        }
+
+        .status-shipped {
+            background: rgba(46,125,100,0.15);
+            color: var(--success);
+        }
+
+        .low-stock-item {
+            padding: 12px 16px;
+            border-left: 3px solid var(--danger);
+            background: rgba(192,57,43,0.08);
+            margin-bottom: 8px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">WMS <span>| Менеджер</span></div>
+        <div class="header-right">
+            <button class="refresh-btn" onclick="refreshAllData()">🔄 Обновить</button>
+            <button class="theme-btn" onclick="toggleTheme()">🌓 Тема</button>
+            <span class="user-name" id="userName"></span>
+            <span class="user-role" id="userRole"></span>
+            <button class="logout-btn" onclick="logout()">Выход</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <ul class="sidebar-menu">
+            <li class="active" onclick="showSection('dashboard')">📊 Обзор</li>
+            <li onclick="showSection('products')">📦 Товары</li>
+            <li onclick="showSection('cells')">📍 Ячейки</li>
+            <li onclick="showSection('incoming')">📥 Приходы</li>
+            <li onclick="showSection('outgoing')">📤 Расходы</li>
+            <li onclick="showSection('reports')">📈 Отчеты</li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div id="message" class="message"></div>
+
+        <div id="dashboard" class="section active">
+            <div class="stats-grid" id="stats">
+                <div class="stat-card"><h3>📦 Товаров</h3><div class="value" id="totalProducts">-</div></div>
+                <div class="stat-card"><h3>📊 Остаток (шт)</h3><div class="value" id="totalStock">-</div></div>
+                <div class="stat-card"><h3>💰 Стоимость</h3><div class="value" id="totalValue">-</div></div>
+                <div class="stat-card"><h3>📈 Загрузка</h3><div class="value" id="occupancy">-</div></div>
+            </div>
+            <div class="card">
+                <div class="card-header">⚠️ Критический остаток</div>
+                <div class="card-body" id="lowStockList"></div>
+            </div>
+            <div class="card">
+                <div class="card-header">📊 Статистика за 30 дней</div>
+                <div class="card-body" id="monthStats"></div>
+            </div>
+        </div>
+
+        <div id="products" class="section">
+            <div class="card">
+                <div class="card-header">📦 Товары</div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table id="productsTable">
+                            <thead><tr><th>ID</th><th>Артикул</th><th>Наименование</th><th>Цена</th><th>Остаток</th><th>Статус</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="cells" class="section">
+            <div class="card">
+                <div class="card-header">📍 Ячейки</div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table id="cellsTable">
+                            <thead><tr><th>Код</th><th>Зона</th><th>Загрузка</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="incoming" class="section">
+            <div class="card">
+                <div class="card-header">📋 Приходные накладные</div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table id="incomingTable">
+                            <thead><tr><th>№</th><th>Дата</th><th>Поставщик</th><th>Статус</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="outgoing" class="section">
+            <div class="card">
+                <div class="card-header">📋 Расходные накладные</div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table id="outgoingTable">
+                            <thead><tr><th>№</th><th>Дата</th><th>Клиент</th><th>Статус</th><th></th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="reports" class="section">
+            <div class="card">
+                <div class="card-header">📄 Экспорт</div>
+                <div class="card-body">
+                    <button onclick="exportProductsReport()" class="btn btn-primary">📦 Товары (CSV)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let products = [];
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            if (current === 'dark') {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        async function init() {
+            const userStr = localStorage.getItem('user');
+            if (!userStr) { window.location.href = '/index.html'; return; }
+            currentUser = JSON.parse(userStr);
+            document.getElementById('userName').textContent = currentUser.fullName;
+            document.getElementById('userRole').textContent = currentUser.role;
+            await refreshAllData();
+        }
+
+        async function refreshAllData() {
+            showMessage('Обновление данных...', 'info');
+            const timestamp = new Date().getTime();
+
+            try {
+                const statsResponse = await fetch('/api/Statistics?_=' + timestamp);
+                const stats = await statsResponse.json();
+
+                const productsResponse = await fetch('/api/Products?_=' + timestamp);
+                products = await productsResponse.json();
+
+                const cellsResponse = await fetch('/api/Cells?_=' + timestamp);
+                const cells = await cellsResponse.json();
+
+                const incomingResponse = await fetch('/api/Incoming?_=' + timestamp);
+                const incoming = await incomingResponse.json();
+
+                const outgoingResponse = await fetch('/api/Outgoing?_=' + timestamp);
+                const outgoing = await outgoingResponse.json();
+
+                document.getElementById('totalProducts').textContent = stats.totalProducts || 0;
+                document.getElementById('totalStock').textContent = stats.totalStock || 0;
+                document.getElementById('totalValue').textContent = (stats.totalValue || 0).toLocaleString() + ' ₽';
+                document.getElementById('occupancy').textContent = Math.round((stats.warehouseOccupancy || 0) / (stats.warehouseCapacity || 1) * 100) + '%';
+
+                const lowStockMap = new Map();
+                if (stats.lowStockProducts && stats.lowStockProducts.length > 0) {
+                    stats.lowStockProducts.forEach(p => {
+                        if (!lowStockMap.has(p.sku)) lowStockMap.set(p.sku, p);
+                    });
+                    const lowStockDiv = document.getElementById('lowStockList');
+                    if (lowStockMap.size > 0) {
+                        lowStockDiv.innerHTML = Array.from(lowStockMap.values()).map(p =>
+                            `<div class="low-stock-item">⚠️ <strong>${p.name}</strong> (${p.sku}): остаток ${p.currentStock} шт. (мин. ${p.minStock})</div>`
+                        ).join('');
+                    } else {
+                        lowStockDiv.innerHTML = '<div style="padding: 12px;">✅ Все товары в норме</div>';
+                    }
+                }
+
+                document.getElementById('monthStats').innerHTML = `
+                            <div style="display: flex; gap: 24px;">
+                                <div><strong>📥 Приходов:</strong> ${stats.incomingLastMonth || 0}</div>
+                                <div><strong>📤 Отгрузок:</strong> ${stats.outgoingLastMonth || 0}</div>
+                            </div>
+                        `;
+
+                const productsTbody = document.querySelector('#productsTable tbody');
+                if (products.length === 0) {
+                    productsTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Нет товаров</td></tr>';
+                } else {
+                    productsTbody.innerHTML = products.map(p => {
+                        const isLow = p.currentStock <= p.minStock;
+                        return `
+                                    <tr>
+                                        <td>${p.id}</td>
+                                        <td>${p.sku}</td>
+                                        <td>${p.name}

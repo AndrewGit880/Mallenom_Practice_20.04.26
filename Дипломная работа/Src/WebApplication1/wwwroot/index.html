@@ -1,0 +1,288 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WMS - Управление складом</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #e8edf2;
+            --bg-secondary: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #5a6e7c;
+            --border: #d0d7de;
+            --header: #1a2a3a;
+            --input: #f5f7fa;
+            --input-border: #c0c8d0;
+            --primary: #2c5f8a;
+            --primary-hover: #1a4a6f;
+            --danger: #c0392b;
+            --success: #2e7d64;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e2e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0b0;
+            --border: #2a2a3a;
+            --header: #0a0a15;
+            --input: #2a2a3a;
+            --input-border: #3a3a4a;
+            --primary: #4a7a9e;
+            --primary-hover: #5a8aae;
+            --danger: #c0392b;
+            --success: #2e7d64;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            display: flex;
+            width: 900px;
+            height: 500px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .login-left {
+            flex: 1;
+            background: var(--header);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+            .login-left h1 {
+                font-size: 32px;
+                font-weight: 400;
+                margin-bottom: 10px;
+                color: white;
+            }
+
+                .login-left h1 span {
+                    font-weight: 600;
+                    color: #4a8abf;
+                }
+
+            .login-left p {
+                color: #8aa0b0;
+                font-size: 14px;
+                margin-bottom: 40px;
+            }
+
+            .login-left .features {
+                list-style: none;
+                margin-top: 40px;
+            }
+
+                .login-left .features li {
+                    margin-bottom: 15px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    color: #b0c4d4;
+                    font-size: 14px;
+                }
+
+                    .login-left .features li:before {
+                        content: "✓";
+                        color: var(--success);
+                        font-weight: bold;
+                    }
+
+        .login-right {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+            .login-right h2 {
+                font-size: 24px;
+                font-weight: 500;
+                color: var(--text-primary);
+                margin-bottom: 30px;
+            }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--text-primary);
+            z-index: 1000;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+            .form-group label {
+                display: block;
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--text-secondary);
+                margin-bottom: 6px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .form-group input {
+                width: 100%;
+                padding: 12px 15px;
+                border: 1px solid var(--input-border);
+                border-radius: 6px;
+                font-size: 14px;
+                background: var(--input);
+                color: var(--text-primary);
+                transition: all 0.2s;
+            }
+
+                .form-group input:focus {
+                    outline: none;
+                    border-color: var(--primary);
+                    background: var(--bg-secondary);
+                    box-shadow: 0 0 0 2px rgba(44,95,138,0.1);
+                }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+            .btn-login:hover {
+                background: var(--primary-hover);
+            }
+
+        .error-message {
+            background: rgba(192,57,43,0.1);
+            color: var(--danger);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            border-left: 3px solid var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓 Тема</button>
+    <div class="login-container">
+        <div class="login-left">
+            <h1>WMS <span>Склад</span></h1>
+            <p>Warehouse Management System</p>
+            <ul class="features">
+                <li>Управление товарными запасами</li>
+                <li>Контроль складских операций</li>
+                <li>Отслеживание движений товаров</li>
+                <li>Аналитика и отчетность</li>
+                <li>Разграничение прав доступа</li>
+            </ul>
+        </div>
+        <div class="login-right">
+            <h2>Авторизация</h2>
+            <div id="errorMsg" style="display: none;"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Логин</label>
+                    <input type="text" id="username" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label>Пароль</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn-login">Войти в систему</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            if (current === 'dark') {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/api/Auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('user', JSON.stringify(data));
+                    if (data.role === 'Администратор') {
+                        window.location.href = '/admin.html';
+                    } else if (data.role === 'Менеджер') {
+                        window.location.href = '/manager.html';
+                    } else {
+                        window.location.href = '/clerk.html';
+                    }
+                } else {
+                    const errorDiv = document.getElementById('errorMsg');
+                    errorDiv.textContent = data.message || 'Неверный логин или пароль';
+                    errorDiv.className = 'error-message';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                const errorDiv = document.getElementById('errorMsg');
+                errorDiv.textContent = 'Ошибка подключения к серверу';
+                errorDiv.className = 'error-message';
+                errorDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

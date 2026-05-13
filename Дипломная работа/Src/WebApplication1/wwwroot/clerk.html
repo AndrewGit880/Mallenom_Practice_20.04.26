@@ -1,0 +1,640 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WMS - Рабочее место кладовщика</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #e8edf2;
+            --bg-secondary: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #5a6e7c;
+            --text-muted: #8aa0b0;
+            --border: #d0d7de;
+            --header: #1a2a3a;
+            --sidebar: #ffffff;
+            --sidebar-hover: #f0f3f8;
+            --input: #f5f7fa;
+            --input-border: #c0c8d0;
+            --primary: #2c5f8a;
+            --primary-hover: #1a4a6f;
+            --success: #2e7d64;
+            --danger: #c0392b;
+            --warning: #e67e22;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0b0;
+            --text-muted: #707080;
+            --border: #2a2a4a;
+            --header: #0f0f23;
+            --sidebar: #1a1a2e;
+            --sidebar-hover: #2a2a4a;
+            --input: #1e1e3a;
+            --input-border: #3a3a5a;
+            --primary: #4a8abf;
+            --primary-hover: #5a9adf;
+            --success: #2e7d64;
+            --danger: #c0392b;
+            --warning: #e67e22;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .header {
+            background: var(--header);
+            color: white;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+            .logo span {
+                font-weight: 300;
+                color: #8aa0b0;
+            }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .theme-btn, .refresh-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .user-name {
+            font-size: 14px;
+        }
+
+        .user-role {
+            background: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid #4a6a7a;
+            padding: 6px 16px;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            width: 240px;
+            height: calc(100% - 56px);
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 16px 0;
+        }
+
+            .sidebar-menu li {
+                padding: 12px 20px;
+                margin: 4px 12px;
+                cursor: pointer;
+                font-size: 14px;
+                color: var(--text-secondary);
+                border-radius: 8px;
+            }
+
+                .sidebar-menu li:hover {
+                    background: var(--sidebar-hover);
+                    color: var(--primary);
+                }
+
+                .sidebar-menu li.active {
+                    background: var(--primary);
+                    color: white;
+                }
+
+        .main-content {
+            margin-left: 240px;
+            margin-top: 56px;
+            padding: 24px;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 160px;
+        }
+
+            .form-group label {
+                display: block;
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--text-secondary);
+                margin-bottom: 6px;
+            }
+
+            .form-group input, .form-group select {
+                width: 100%;
+                padding: 10px 12px;
+                border: 1px solid var(--input-border);
+                border-radius: 8px;
+                background: var(--input);
+                color: var(--text-primary);
+            }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            background: var(--sidebar-hover);
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .message {
+            position: fixed;
+            top: 70px;
+            right: 24px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: none;
+            z-index: 1000;
+        }
+
+            .message.success {
+                background: var(--success);
+                color: white;
+            }
+
+            .message.error {
+                background: var(--danger);
+                color: white;
+            }
+
+            .message.info {
+                background: var(--primary);
+                color: white;
+            }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+        }
+
+        .status-new {
+            background: rgba(44,95,138,0.15);
+            color: var(--primary);
+        }
+
+        .status-picking {
+            background: rgba(230,126,34,0.15);
+            color: var(--warning);
+        }
+
+        .receive-item, .order-item {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+            .receive-item .form-group, .order-item .form-group {
+                flex: 1;
+                margin-bottom: 0;
+            }
+
+        .remove-item-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">WMS <span>| Кладовщик</span></div>
+        <div class="header-right">
+            <button class="refresh-btn" onclick="refreshAllData()">🔄 Обновить</button>
+            <button class="theme-btn" onclick="toggleTheme()">🌓 Тема</button>
+            <span class="user-name" id="userName"></span>
+            <span class="user-role" id="userRole"></span>
+            <button class="logout-btn" onclick="logout()">Выход</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <ul class="sidebar-menu">
+            <li class="active" onclick="showSection('incoming')">📥 Приемка товара</li>
+            <li onclick="showSection('outgoing')">📦 Сборка заказов</li>
+            <li onclick="showSection('products')">📋 Товары</li>
+            <li onclick="showSection('cells')">📍 Ячейки</li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div id="message" class="message"></div>
+
+        <div id="incoming" class="section active">
+            <div class="card">
+                <div class="card-header">📥 Оформление прихода товара</div>
+                <div class="card-body">
+                    <form id="receiveForm">
+                        <div class="form-row">
+                            <div class="form-group" style="flex:0.5;"><label>Поставщик</label><input type="text" id="supplier" required placeholder="ООО Поставка"></div>
+                        </div>
+                        <div id="receiveItems"></div>
+                        <button type="button" onclick="addReceiveItem()" class="btn btn-sm" style="margin: 10px 0; background: var(--sidebar-hover);">+ Добавить позицию</button>
+                        <div><button type="submit" class="btn btn-primary">✅ Оформить приход</button></div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">📋 Приходные накладные</div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table id="incomingTable">
+                            <thead><tr><th>№</th><th>Дата</th><th>Поставщик</th><th>Статус</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="outgoing" class="section">
+            <div class="card">
+                <div class="card-header">📦 Активные заказы на сборку</div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table id="outgoingTable">
+                            <thead><tr><th>№</th><th>Дата</th><th>Клиент</th><th>Статус</th><th></th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="products" class="section">
+            <div class="card">
+                <div class="card-header">📋 Товары на складе</div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table id="productsTable">
+                            <thead><tr><th>Артикул</th><th>Наименование</th><th>Остаток</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="cells" class="section">
+            <div class="card">
+                <div class="card-header">📍 Складские ячейки</div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table id="cellsTable">
+                            <thead><tr><th>Код</th><th>Зона</th><th>Загрузка</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let products = [];
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            if (current === 'dark') {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        async function init() {
+            const userStr = localStorage.getItem('user');
+            if (!userStr) { window.location.href = '/index.html'; return; }
+            currentUser = JSON.parse(userStr);
+            document.getElementById('userName').textContent = currentUser.fullName;
+            document.getElementById('userRole').textContent = currentUser.role;
+            await refreshAllData();
+        }
+
+        async function refreshAllData() {
+            showMessage('Обновление...', 'info');
+            await Promise.all([
+                loadProducts(),
+                loadCells(),
+                loadIncoming(),
+                loadOutgoing()
+            ]);
+            await loadProductSelects();
+            showMessage('Данные обновлены', 'success');
+        }
+
+        async function loadProducts() {
+            const response = await fetch('/api/Products');
+            products = await response.json();
+            const tbody = document.querySelector('#productsTable tbody');
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Нет товаров</td></tr>';
+                return;
+            }
+            tbody.innerHTML = products.map(p => `
+                        <tr>
+                            <td>${escapeHtml(p.sku)}</td>
+                            <td>${escapeHtml(p.name)}</td>
+                            <td style="${p.currentStock <= p.minStock ? 'color: var(--danger); font-weight: bold;' : ''}">${p.currentStock} шт.</td>
+                        </tr>
+                    `).join('');
+        }
+
+        async function loadCells() {
+            const response = await fetch('/api/Cells');
+            const cells = await response.json();
+            const tbody = document.querySelector('#cellsTable tbody');
+            if (cells.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Нет ячеек</td></tr>';
+                return;
+            }
+            tbody.innerHTML = cells.map(c => {
+                const percent = Math.min(100, (c.currentOccupancy / c.maxCapacity) * 100);
+                return `
+                            <tr>
+                                <td>${escapeHtml(c.code)}</td>
+                                <td>${escapeHtml(c.zone)}</td>
+                                <td><div style="background: var(--border); width: 100px; border-radius: 10px;"><div style="background: var(--primary); width: ${percent}%; height: 8px; border-radius: 10px;"></div></div> ${c.currentOccupancy}/${c.maxCapacity}</td>
+                            </tr>
+                        `;
+            }).join('');
+        }
+
+        async function loadIncoming() {
+            const response = await fetch('/api/Incoming');
+            const invoices = await response.json();
+            const tbody = document.querySelector('#incomingTable tbody');
+            if (!invoices || invoices.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Нет приходов</td></tr>';
+                return;
+            }
+            tbody.innerHTML = invoices.map(i => `
+                        <tr>
+                            <td>${escapeHtml(i.number)}</td>
+                            <td>${new Date(i.date).toLocaleDateString()}</td>
+                            <td>${escapeHtml(i.supplier)}</td>
+                            <td><span class="status-badge status-new">${escapeHtml(i.status)}</span></td>
+                        </tr>
+                    `).join('');
+        }
+
+        async function loadOutgoing() {
+            const response = await fetch('/api/Outgoing');
+            const invoices = await response.json();
+            const activeOrders = invoices.filter(i => i.status === 'Новый' || i.status === 'Собран');
+            const tbody = document.querySelector('#outgoingTable tbody');
+            if (activeOrders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Нет активных заказов</td></tr>';
+                return;
+            }
+            tbody.innerHTML = activeOrders.map(i => `
+                        <tr>
+                            <td>${escapeHtml(i.number)}</td>
+                            <td>${new Date(i.date).toLocaleDateString()}</td>
+                            <td>${escapeHtml(i.customer)}</td>
+                            <td><span class="status-badge ${i.status === 'Новый' ? 'status-new' : 'status-picking'}">${escapeHtml(i.status)}</span></td>
+                            <td>
+                                ${i.status === 'Новый' ? `<button onclick="pickOrder(${i.id})" class="btn btn-success btn-sm">📦 Собрать</button>` : ''}
+                                ${i.status === 'Собран' ? `<button onclick="shipOrder(${i.id})" class="btn btn-primary btn-sm">🚚 Отгрузить</button>` : ''}
+                            </td>
+                        </tr>
+                    `).join('');
+        }
+
+        async function pickOrder(id) {
+            showMessage('Сборка заказа...', 'info');
+            const response = await fetch(`/api/Outgoing/${id}/pick`, { method: 'POST' });
+            if (response.ok) {
+                await refreshAllData();
+                showMessage('✅ Заказ собран! Остатки обновлены', 'success');
+            } else {
+                const data = await response.json();
+                showMessage(data.message || '❌ Ошибка сборки', 'error');
+            }
+        }
+
+        async function shipOrder(id) {
+            showMessage('Отгрузка заказа...', 'info');
+            await fetch(`/api/Outgoing/${id}/ship`, { method: 'POST' });
+            await refreshAllData();
+            showMessage('✅ Заказ отгружен', 'success');
+        }
+
+        async function loadProductSelects() {
+            const selects = document.querySelectorAll('.product-select');
+            selects.forEach(select => {
+                select.innerHTML = '<option value="">-- Выберите товар --</option>' +
+                    products.map(p => `<option value="${p.id}">${escapeHtml(p.name)} (${p.sku}) - остаток: ${p.currentStock} шт.</option>`).join('');
+            });
+        }
+
+        function addReceiveItem() {
+            const div = document.createElement('div');
+            div.className = 'receive-item';
+            div.innerHTML = `
+                        <div class="form-group" style="flex:2;"><select class="product-select" style="width:100%"></select></div>
+                        <div class="form-group" style="flex:1;"><input type="number" placeholder="Количество" class="receive-qty"></div>
+                        <div class="form-group" style="flex:1;"><input type="number" placeholder="Цена за шт" class="receive-price"></div>
+                        <button type="button" class="remove-item-btn" onclick="this.parentElement.remove()">✕</button>
+                    `;
+            document.getElementById('receiveItems').appendChild(div);
+            loadProductSelects();
+        }
+
+        document.getElementById('receiveForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const items = [];
+            document.querySelectorAll('.receive-item').forEach(item => {
+                const productId = item.querySelector('.product-select').value;
+                const quantity = item.querySelector('.receive-qty').value;
+                const price = item.querySelector('.receive-price').value;
+                if (productId && quantity && parseInt(quantity) > 0) {
+                    items.push({ productId: parseInt(productId), quantity: parseInt(quantity), price: parseFloat(price) || 0 });
+                }
+            });
+            if (items.length === 0) {
+                showMessage('❌ Добавьте хотя бы одну позицию', 'error');
+                return;
+            }
+            showMessage('Оформление прихода...', 'info');
+            await fetch('/api/Incoming/receive', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ supplier: document.getElementById('supplier').value, userId: currentUser.id, items })
+            });
+            await refreshAllData();
+            document.getElementById('receiveForm').reset();
+            document.getElementById('receiveItems').innerHTML = '';
+            showMessage('✅ Приход оформлен! Остатки обновлены', 'success');
+        });
+
+        function showMessage(msg, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.textContent = msg;
+            msgDiv.className = `message ${type}`;
+            msgDiv.style.display = 'block';
+            setTimeout(() => msgDiv.style.display = 'none', 3000);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showSection(section) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+            document.querySelectorAll('.sidebar-menu li').forEach(li => li.classList.remove('active'));
+            if (event && event.target) event.target.classList.add('active');
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = '/index.html';
+        }
+
+        setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                refreshAllData();
+            }
+        }, 30000);
+
+        init();
+    </script>
+</body>
+</html>

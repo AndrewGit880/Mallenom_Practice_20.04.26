@@ -1,0 +1,1046 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WMS - Администратор</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #e8edf2;
+            --bg-secondary: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #5a6e7c;
+            --text-muted: #8aa0b0;
+            --border: #d0d7de;
+            --header: #1a2a3a;
+            --sidebar: #ffffff;
+            --sidebar-hover: #f0f3f8;
+            --input: #f5f7fa;
+            --input-border: #c0c8d0;
+            --primary: #2c5f8a;
+            --primary-hover: #1a4a6f;
+            --success: #2e7d64;
+            --danger: #c0392b;
+            --warning: #e67e22;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0b0;
+            --text-muted: #707080;
+            --border: #2a2a4a;
+            --header: #0f0f23;
+            --sidebar: #1a1a2e;
+            --sidebar-hover: #2a2a4a;
+            --input: #1e1e3a;
+            --input-border: #3a3a5a;
+            --primary: #4a8abf;
+            --primary-hover: #5a9adf;
+            --success: #2e7d64;
+            --danger: #c0392b;
+            --warning: #e67e22;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .header {
+            background: var(--header);
+            color: white;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+            .logo span {
+                font-weight: 300;
+                color: #8aa0b0;
+            }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .theme-btn, .refresh-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .user-name {
+            font-size: 14px;
+        }
+
+        .user-role {
+            background: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid #4a6a7a;
+            padding: 6px 16px;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            width: 240px;
+            height: calc(100% - 56px);
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 16px 0;
+        }
+
+            .sidebar-menu li {
+                padding: 12px 20px;
+                margin: 4px 12px;
+                cursor: pointer;
+                font-size: 14px;
+                color: var(--text-secondary);
+                border-radius: 8px;
+                transition: all 0.2s;
+            }
+
+                .sidebar-menu li:hover {
+                    background: var(--sidebar-hover);
+                    color: var(--primary);
+                }
+
+                .sidebar-menu li.active {
+                    background: var(--primary);
+                    color: white;
+                }
+
+        .main-content {
+            margin-left: 240px;
+            margin-top: 56px;
+            padding: 24px;
+            min-height: calc(100vh - 56px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+            .stat-card h3 {
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                margin-bottom: 8px;
+            }
+
+            .stat-card .value {
+                font-size: 32px;
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+        .section {
+            display: none;
+        }
+
+            .section.active {
+                display: block;
+            }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+            .form-group label {
+                display: block;
+                font-size: 12px;
+                font-weight: 500;
+                color: var(--text-secondary);
+                margin-bottom: 5px;
+            }
+
+            .form-group input, .form-group select {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid var(--input-border);
+                border-radius: 6px;
+                font-size: 14px;
+                background: var(--input);
+                color: var(--text-primary);
+            }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--sidebar-hover);
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        tr:hover {
+            background: var(--sidebar-hover);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+            .btn-primary:hover {
+                background: var(--primary-hover);
+            }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+
+        .message {
+            position: fixed;
+            top: 70px;
+            right: 24px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: none;
+            z-index: 1000;
+        }
+
+            .message.success {
+                background: var(--success);
+                color: white;
+            }
+
+            .message.error {
+                background: var(--danger);
+                color: white;
+            }
+
+            .message.info {
+                background: var(--primary);
+                color: white;
+            }
+
+        .status-badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+        }
+
+        .status-critical {
+            background: rgba(192,57,43,0.15);
+            color: var(--danger);
+        }
+
+        .status-normal {
+            background: rgba(46,125,100,0.15);
+            color: var(--success);
+        }
+
+        .status-empty {
+            background: rgba(136,136,136,0.15);
+            color: #888;
+        }
+
+        .low-stock-item {
+            padding: 12px;
+            border-left: 3px solid var(--danger);
+            background: rgba(192,57,43,0.08);
+            margin-bottom: 8px;
+            border-radius: 6px;
+        }
+
+        .receive-item, .order-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+            .receive-item select, .order-item select {
+                flex: 2;
+                padding: 8px;
+                border: 1px solid var(--input-border);
+                border-radius: 6px;
+                background: var(--input);
+                color: var(--text-primary);
+            }
+
+            .receive-item input, .order-item input {
+                flex: 1;
+                padding: 8px;
+                border: 1px solid var(--input-border);
+                border-radius: 6px;
+                background: var(--input);
+                color: var(--text-primary);
+            }
+
+        .remove-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .info-note {
+            margin-top: 15px;
+            padding: 10px;
+            background: var(--input);
+            border-radius: 6px;
+            font-size: 12px;
+            border-left: 3px solid var(--primary);
+            color: var(--text-primary);
+        }
+
+        .progress-bar {
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            width: 100px;
+        }
+
+        .progress-fill {
+            background: var(--primary);
+            height: 8px;
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">WMS <span>| Администратор</span></div>
+        <div class="header-right">
+            <button class="refresh-btn" onclick="manualRefresh()">🔄 Обновить</button>
+            <button class="theme-btn" onclick="toggleTheme()">🌓 Тема</button>
+            <span class="user-name" id="userName"></span>
+            <span class="user-role" id="userRole"></span>
+            <button class="logout-btn" onclick="logout()">Выход</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <ul class="sidebar-menu">
+            <li class="active" onclick="showSection('dashboard')">📊 Обзор</li>
+            <li onclick="showSection('users')">👥 Пользователи</li>
+            <li onclick="showSection('products')">📦 Товары</li>
+            <li onclick="showSection('cells')">📍 Ячейки</li>
+            <li onclick="showSection('incoming')">📥 Приходы</li>
+            <li onclick="showSection('outgoing')">📤 Расходы</li>
+            <li onclick="showSection('reports')">📈 Отчеты</li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div id="message" class="message"></div>
+
+        <!-- Обзор -->
+        <div id="dashboard" class="section active">
+            <div class="stats-grid">
+                <div class="stat-card"><h3>📦 Товаров</h3><div class="value" id="totalProducts">-</div></div>
+                <div class="stat-card"><h3>📊 Остаток (шт)</h3><div class="value" id="totalStock">-</div></div>
+                <div class="stat-card"><h3>💰 Стоимость (₽)</h3><div class="value" id="totalValue">-</div></div>
+                <div class="stat-card"><h3>👥 Пользователей</h3><div class="value" id="totalUsers">-</div></div>
+            </div>
+            <div class="card"><div class="card-header">⚠️ Товары с критическим остатком</div><div class="card-body" id="lowStockList"></div></div>
+            <div class="card"><div class="card-header">📊 Статистика за 30 дней</div><div class="card-body" id="monthStats"></div></div>
+        </div>
+
+        <!-- Пользователи -->
+        <div id="users" class="section">
+            <div class="card">
+                <div class="card-header">➕ Добавить пользователя</div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group"><label>Логин</label><input type="text" id="userLogin" placeholder="user"></div>
+                        <div class="form-group"><label>Пароль</label><input type="password" id="userPass" placeholder="***"></div>
+                        <div class="form-group"><label>ФИО</label><input type="text" id="userFullname" placeholder="Иванов Иван"></div>
+                        <div class="form-group"><label>Роль</label><select id="userRoleSelect"><option>Кладовщик</option><option>Менеджер</option><option>Администратор</option></select></div>
+                        <div><button class="btn btn-primary" onclick="addUser()">Создать</button></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card"><div class="card-header">👥 Список пользователей</div><div class="card-body"><table id="usersTable"><thead><tr><th>ID</th><th>Логин</th><th>ФИО</th><th>Роль</th><th></th></tr></thead><tbody></td><td colspan="5" style="text-align:center">Загрузка...</td></tr></tbody></table></div></div>
+        </div>
+
+        <!-- Товары -->
+        <div id="products" class="section">
+            <div class="card">
+                <div class="card-header">➕ Добавить товар</div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group"><label>Артикул</label><input type="text" id="prodSku" placeholder="PRD-001"></div>
+                        <div class="form-group"><label>Наименование</label><input type="text" id="prodName" placeholder="Ноутбук"></div>
+                        <div class="form-group"><label>Категория</label><input type="text" id="prodCategory" placeholder="Электроника"></div>
+                        <div class="form-group"><label>Цена</label><input type="number" id="prodPrice" placeholder="1000"></div>
+                        <div class="form-group"><label>Мин.остаток</label><input type="number" id="prodMinStock" value="5"></div>
+                        <div><button class="btn btn-primary" onclick="addProduct()">Добавить</button></div>
+                    </div>
+                    <div class="info-note">💡 Новый товар создается с остатком 0. Для увеличения остатка оформите приход.</div>
+                </div>
+            </div>
+            <div class="card"><div class="card-header">📦 Товары</div><div class="card-body"><table id="productsTable"><thead><tr><th>ID</th><th>Артикул</th><th>Наименование</th><th>Категория</th><th>Цена</th><th>Остаток</th><th>Статус</th><th></th></tr></thead><tbody><tr><td colspan="8" style="text-align:center">Загрузка...</td></tr></tbody></table></div></div>
+        </div>
+
+        <!-- Ячейки -->
+        <div id="cells" class="section">
+            <div class="card">
+                <div class="card-header">➕ Добавить ячейку</div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group"><label>Код</label><input type="text" id="cellCode" placeholder="A-01"></div>
+                        <div class="form-group"><label>Зона</label><select id="cellZone"><option>Приемка</option><option>Хранение</option><option>Отгрузка</option></select></div>
+                        <div class="form-group"><label>Вместимость</label><input type="number" id="cellCapacity" value="1000"></div>
+                        <div><button class="btn btn-primary" onclick="addCell()">Добавить</button></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">📍 Складские ячейки</div><div class="card-body">
+                    <table id="cellsTable">
+                        <thead><tr><th>Код</th><th>Зона</th><th>Вместимость</th><th>Загрузка</th><th>Заполнение</th><th>Статус</th></tr></thead>
+                        <tbody><tr><td colspan="6" style="text-align:center">Загрузка...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Приходы -->
+        <div id="incoming" class="section">
+            <div class="card">
+                <div class="card-header">📥 Оформить приход</div>
+                <div class="card-body">
+                    <div class="form-row"><div class="form-group"><label>Поставщик</label><input type="text" id="supplierName" placeholder="ООО Поставка"></div></div>
+                    <div id="receiveItemsList"></div>
+                    <button class="btn btn-sm" onclick="addReceiveItem()" style="margin:10px 0;">+ Добавить позицию</button>
+                    <div><button class="btn btn-primary" onclick="submitReceive()">✅ Оформить приход</button></div>
+                </div>
+            </div>
+            <div class="card"><div class="card-header">📋 Приходные накладные</div><div class="card-body"><table id="incomingTable"><thead><tr><th>№</th><th>Дата</th><th>Поставщик</th><th>Статус</th><th></th></tr></thead><tbody><tr><td colspan="5" style="text-align:center">Загрузка...</td></tr></tbody></table></div></div>
+        </div>
+
+        <!-- Расходы -->
+        <div id="outgoing" class="section">
+            <div class="card">
+                <div class="card-header">📤 Создать заказ</div>
+                <div class="card-body">
+                    <div class="form-row"><div class="form-group"><label>Клиент</label><input type="text" id="customerName" placeholder="ООО Клиент"></div></div>
+                    <div id="orderItemsList"></div>
+                    <button class="btn btn-sm" onclick="addOrderItem()" style="margin:10px 0;">+ Добавить товар</button>
+                    <div><button class="btn btn-primary" onclick="submitOrder()">✅ Создать заказ</button></div>
+                </div>
+            </div>
+            <div class="card"><div class="card-header">📋 Расходные накладные</div><div class="card-body"><table id="outgoingTable"><thead><tr><th>№</th><th>Дата</th><th>Клиент</th><th>Статус</th><th></th></tr></thead><tbody><tr><td colspan="5" style="text-align:center">Загрузка...</td></tr></tbody></table></div></div>
+        </div>
+
+        <!-- Отчеты -->
+        <div id="reports" class="section">
+            <div class="card">
+                <div class="card-header">📄 Экспорт данных</div>
+                <div class="card-body">
+                    <button class="btn btn-primary" onclick="exportProducts()" style="margin-right:12px;">📦 Товары (CSV)</button>
+                    <button class="btn btn-primary" onclick="exportIncoming()" style="margin-right:12px;">📥 Приходы (CSV)</button>
+                    <button class="btn btn-primary" onclick="exportOutgoing()">📤 Расходы (CSV)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let productsList = [];
+        let cellsList = [];
+        let autoRefreshInterval = null;
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+
+        async function init() {
+            const userStr = localStorage.getItem('user');
+            if (!userStr) { window.location.href = '/index.html'; return; }
+            currentUser = JSON.parse(userStr);
+            document.getElementById('userName').innerText = currentUser.fullName;
+            document.getElementById('userRole').innerText = currentUser.role;
+
+            await loadAllData();
+            autoRefreshInterval = setInterval(() => { loadAllDataSilent(); }, 30000);
+        }
+
+        async function loadAllDataSilent() {
+            try {
+                await Promise.all([
+                    loadStatsSilent(),
+                    loadUsersSilent(),
+                    loadProductsSilent(),
+                    loadCellsSilent(),
+                    loadIncomingSilent(),
+                    loadOutgoingSilent()
+                ]);
+                await updateProductSelects();
+            } catch (e) { console.error('Auto refresh error:', e); }
+        }
+
+        async function manualRefresh() {
+            showMessage('Обновление данных...', 'info');
+            try {
+                await loadAllData();
+                showMessage('✅ Данные обновлены', 'success');
+            } catch (e) {
+                showMessage('❌ Ошибка обновления', 'error');
+            }
+        }
+
+        async function loadAllData() {
+            await Promise.all([
+                loadStats(),
+                loadUsers(),
+                loadProducts(),
+                loadCells(),
+                loadIncoming(),
+                loadOutgoing()
+            ]);
+            await updateProductSelects();
+        }
+
+        async function loadStatsSilent() {
+            const res = await fetch('/api/Statistics?_=' + Date.now());
+            const s = await res.json();
+            document.getElementById('totalProducts').innerHTML = s.totalProducts || 0;
+            document.getElementById('totalStock').innerHTML = s.totalStock || 0;
+            document.getElementById('totalValue').innerHTML = (s.totalValue || 0).toLocaleString() + ' ₽';
+            const lowDiv = document.getElementById('lowStockList');
+            if (s.lowStockProducts?.length > 0) {
+                lowDiv.innerHTML = s.lowStockProducts.map(p => `<div class="low-stock-item">⚠️ ${p.name} (${p.sku}): ${p.currentStock} шт. (мин.${p.minStock})</div>`).join('');
+            } else { lowDiv.innerHTML = '<div>✅ Все товары в норме</div>'; }
+            document.getElementById('monthStats').innerHTML = `<div>📥 Приходов: ${s.incomingLastMonth || 0} | 📤 Отгрузок: ${s.outgoingLastMonth || 0} | 📊 Загрузка склада: ${Math.round((s.warehouseOccupancy || 0) / (s.warehouseCapacity || 1) * 100)}%</div>`;
+        }
+
+        async function loadStats() {
+            const res = await fetch('/api/Statistics?_=' + Date.now());
+            const s = await res.json();
+            document.getElementById('totalProducts').innerHTML = s.totalProducts || 0;
+            document.getElementById('totalStock').innerHTML = s.totalStock || 0;
+            document.getElementById('totalValue').innerHTML = (s.totalValue || 0).toLocaleString() + ' ₽';
+            const lowDiv = document.getElementById('lowStockList');
+            if (s.lowStockProducts?.length > 0) {
+                lowDiv.innerHTML = s.lowStockProducts.map(p => `<div class="low-stock-item">⚠️ ${p.name} (${p.sku}): ${p.currentStock} шт. (мин.${p.minStock})</div>`).join('');
+            } else { lowDiv.innerHTML = '<div>✅ Все товары в норме</div>'; }
+            document.getElementById('monthStats').innerHTML = `<div>📥 Приходов: ${s.incomingLastMonth || 0} | 📤 Отгрузок: ${s.outgoingLastMonth || 0} | 📊 Загрузка склада: ${Math.round((s.warehouseOccupancy || 0) / (s.warehouseCapacity || 1) * 100)}%</div>`;
+        }
+
+        async function loadUsersSilent() {
+            const res = await fetch('/api/Admin/users?_=' + Date.now());
+            const users = await res.json();
+            document.getElementById('totalUsers').innerHTML = users.length;
+            const tbody = document.querySelector('#usersTable tbody');
+            if (users.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Нет пользователей</td></tr>'; return; }
+            tbody.innerHTML = users.map(u => `
+                    <tr>
+                        <td>${u.id}</td><td>${escapeHtml(u.username)}</td><td>${escapeHtml(u.fullName)}</td><td>${escapeHtml(u.role)}</td>
+                        <td><button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})">Удалить</button></td>
+                    </tr>
+                `).join('');
+        }
+
+        async function loadUsers() {
+            const res = await fetch('/api/Admin/users?_=' + Date.now());
+            const users = await res.json();
+            document.getElementById('totalUsers').innerHTML = users.length;
+            const tbody = document.querySelector('#usersTable tbody');
+            if (users.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Нет пользователей</td></tr>'; return; }
+            tbody.innerHTML = users.map(u => `
+                    <tr>
+                        <td>${u.id}</td><td>${escapeHtml(u.username)}</td><td>${escapeHtml(u.fullName)}</td><td>${escapeHtml(u.role)}</td>
+                        <td><button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})">Удалить</button></td>
+                    </tr>
+                `).join('');
+        }
+
+        async function loadProductsSilent() {
+            const res = await fetch('/api/Products?_=' + Date.now());
+            productsList = await res.json();
+            const tbody = document.querySelector('#productsTable tbody');
+            if (productsList.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">Нет товаров</td></tr>'; return; }
+            tbody.innerHTML = productsList.map(p => {
+                const isLow = p.currentStock <= p.minStock;
+                return `
+                        <tr>
+                            <td>${p.id}</td><td>${escapeHtml(p.sku)}</td><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.category || '-')}</td>
+                            <td>${p.price.toLocaleString()} ₽</td>
+                            <td style="${isLow ? 'color:#c0392b;font-weight:bold' : ''}">${p.currentStock}</td>
+                            <td>${isLow ? '<span class="status-badge status-critical">Критический</span>' : '<span class="status-badge status-normal">Норма</span>'}</td>
+                            <td><button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">Удалить</button></td>
+                        </tr>
+                    `;
+            }).join('');
+        }
+
+        async function loadProducts() {
+            const res = await fetch('/api/Products?_=' + Date.now());
+            productsList = await res.json();
+            const tbody = document.querySelector('#productsTable tbody');
+            if (productsList.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">Нет товаров</td></tr>'; return; }
+            tbody.innerHTML = productsList.map(p => {
+                const isLow = p.currentStock <= p.minStock;
+                return `
+                        <tr>
+                            <td>${p.id}</td><td>${escapeHtml(p.sku)}</td><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.category || '-')}</td>
+                            <td>${p.price.toLocaleString()} ₽</td>
+                            <td style="${isLow ? 'color:#c0392b;font-weight:bold' : ''}">${p.currentStock}</td>
+                            <td>${isLow ? '<span class="status-badge status-critical">Критический</span>' : '<span class="status-badge status-normal">Норма</span>'}</td>
+                            <td><button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">Удалить</button></td>
+                        </tr>
+                    `;
+            }).join('');
+        }
+
+        async function loadCellsSilent() {
+            const res = await fetch('/api/Cells?_=' + Date.now());
+            cellsList = await res.json();
+            const totalStock = productsList.reduce((sum, p) => sum + p.currentStock, 0);
+            // Одна единица товара занимает 2 места
+            const totalSpaceNeeded = totalStock * 2;
+
+            // Получаем только ячейки хранения, сортируем по вместимости (меньше сначала)
+            const storageCells = cellsList.filter(c => c.zone === 'Хранение').sort((a, b) => a.maxCapacity - b.maxCapacity);
+
+            // Распределяем загрузку последовательно
+            let remainingSpace = totalSpaceNeeded;
+            const cellLoads = {};
+
+            for (const cell of storageCells) {
+                if (remainingSpace <= 0) {
+                    cellLoads[cell.id] = 0;
+                } else if (remainingSpace >= cell.maxCapacity) {
+                    cellLoads[cell.id] = cell.maxCapacity;
+                    remainingSpace -= cell.maxCapacity;
+                } else {
+                    cellLoads[cell.id] = remainingSpace;
+                    remainingSpace = 0;
+                }
+            }
+
+            const tbody = document.querySelector('#cellsTable tbody');
+            if (cellsList.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Нет ячеек</td></tr>'; return; }
+            tbody.innerHTML = cellsList.map(c => {
+                let loadText = '';
+                let statusText = '';
+                let percent = 0;
+                let fillWidth = '';
+                let currentLoad = 0;
+
+                if (c.zone === 'Хранение') {
+                    currentLoad = cellLoads[c.id] || 0;
+                    percent = Math.min(100, (currentLoad / c.maxCapacity) * 100);
+                    loadText = `${currentLoad} / ${c.maxCapacity}`;
+                    fillWidth = `width: ${percent}%;`;
+                    if (currentLoad >= c.maxCapacity) {
+                        statusText = '<span class="status-badge status-critical">Заполнена</span>';
+                    } else if (currentLoad > 0) {
+                        statusText = '<span class="status-badge status-normal">Частично</span>';
+                    } else {
+                        statusText = '<span class="status-badge status-empty">Не используется</span>';
+                    }
+                } else {
+                    loadText = `0 / ${c.maxCapacity}`;
+                    statusText = '<span class="status-badge status-empty">Не используется</span>';
+                    fillWidth = 'width: 0%;';
+                }
+
+                return `
+                        <tr>
+                            <td>${escapeHtml(c.code)}</td>
+                            <td>${escapeHtml(c.zone)}</td>
+                            <td>${c.maxCapacity}</td>
+                            <td>${loadText}</td>
+                            <td><div class="progress-bar"><div class="progress-fill" style="${fillWidth}"></div></div></td>
+                            <td>${statusText}</td>
+                        </tr>
+                    `;
+            }).join('');
+        }
+
+        async function loadCells() {
+            const res = await fetch('/api/Cells?_=' + Date.now());
+            cellsList = await res.json();
+            const totalStock = productsList.reduce((sum, p) => sum + p.currentStock, 0);
+            // Одна единица товара занимает 2 места
+            const totalSpaceNeeded = totalStock * 2;
+
+            // Получаем только ячейки хранения, сортируем по вместимости (меньше сначала)
+            const storageCells = cellsList.filter(c => c.zone === 'Хранение').sort((a, b) => a.maxCapacity - b.maxCapacity);
+
+            // Распределяем загрузку последовательно
+            let remainingSpace = totalSpaceNeeded;
+            const cellLoads = {};
+
+            for (const cell of storageCells) {
+                if (remainingSpace <= 0) {
+                    cellLoads[cell.id] = 0;
+                } else if (remainingSpace >= cell.maxCapacity) {
+                    cellLoads[cell.id] = cell.maxCapacity;
+                    remainingSpace -= cell.maxCapacity;
+                } else {
+                    cellLoads[cell.id] = remainingSpace;
+                    remainingSpace = 0;
+                }
+            }
+
+            const tbody = document.querySelector('#cellsTable tbody');
+            if (cellsList.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Нет ячеек</td></tr>'; return; }
+            tbody.innerHTML = cellsList.map(c => {
+                let loadText = '';
+                let statusText = '';
+                let percent = 0;
+                let fillWidth = '';
+                let currentLoad = 0;
+
+                if (c.zone === 'Хранение') {
+                    currentLoad = cellLoads[c.id] || 0;
+                    percent = Math.min(100, (currentLoad / c.maxCapacity) * 100);
+                    loadText = `${currentLoad} / ${c.maxCapacity}`;
+                    fillWidth = `width: ${percent}%;`;
+                    if (currentLoad >= c.maxCapacity) {
+                        statusText = '<span class="status-badge status-critical">Заполнена</span>';
+                    } else if (currentLoad > 0) {
+                        statusText = '<span class="status-badge status-normal">Частично</span>';
+                    } else {
+                        statusText = '<span class="status-badge status-empty">Пустая</span>';
+                    }
+                } else {
+                    loadText = `0 / ${c.maxCapacity}`;
+                    statusText = '<span class="status-badge status-empty">Не используется</span>';
+                    fillWidth = 'width: 0%;';
+                }
+
+                return `
+                        <tr>
+                            <td>${escapeHtml(c.code)}</td>
+                            <td>${escapeHtml(c.zone)}</td>
+                            <td>${c.maxCapacity}</td>
+                            <td>${loadText}</td>
+                            <td><div class="progress-bar"><div class="progress-fill" style="${fillWidth}"></div></div></td>
+                            <td>${statusText}</td>
+                        </tr>
+                    `;
+            }).join('');
+        }
+
+        async function loadIncomingSilent() {
+            const res = await fetch('/api/Incoming?_=' + Date.now());
+            const data = await res.json();
+            const tbody = document.querySelector('#incomingTable tbody');
+            if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Нет приходов</td></tr>'; return; }
+            tbody.innerHTML = data.map(i => `
+                    <tr>
+                        <td>${escapeHtml(i.number)}</td>
+                        <td>${new Date(i.date).toLocaleDateString()}</td>
+                        <td>${escapeHtml(i.supplier)}</td>
+                        <td>${escapeHtml(i.status)}</td>
+                        <td><button class="btn btn-danger btn-sm" onclick="deleteIncoming(${i.id})">Удалить</button></td>
+                    </tr>
+                `).join('');
+        }
+
+        async function loadIncoming() {
+            const res = await fetch('/api/Incoming?_=' + Date.now());
+            const data = await res.json();
+            const tbody = document.querySelector('#incomingTable tbody');
+            if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Нет приходов</td></tr>'; return; }
+            tbody.innerHTML = data.map(i => `
+                    <tr>
+                        <td>${escapeHtml(i.number)}</td>
+                        <td>${new Date(i.date).toLocaleDateString()}</td>
+                        <td>${escapeHtml(i.supplier)}</td>
+                        <td>${escapeHtml(i.status)}</td>
+                        <td><button class="btn btn-danger btn-sm" onclick="deleteIncoming(${i.id})">Удалить</button></td>
+                    </tr>
+                `).join('');
+        }
+
+        async function loadOutgoingSilent() {
+            const res = await fetch('/api/Outgoing?_=' + Date.now());
+            const data = await res.json();
+            const tbody = document.querySelector('#outgoingTable tbody');
+            if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Нет расходов</td></tr>'; return; }
+            tbody.innerHTML = data.map(i => `
+                    <tr>
+                        <td>${escapeHtml(i.number)}</td>
+                        <td>${new Date(i.date).toLocaleDateString()}</td>
+                        <td>${escapeHtml(i.customer)}</td>
+                        <td>${escapeHtml(i.status)}</td>
+                        <td>
+                            ${i.status === 'Новый' ? `<button class="btn btn-success btn-sm" onclick="pickOrder(${i.id})">Собрать</button>` : ''}
+                            ${i.status === 'Собран' ? `<button class="btn btn-primary btn-sm" onclick="shipOrder(${i.id})">Отгрузить</button>` : ''}
+                            <button class="btn btn-danger btn-sm" onclick="deleteOutgoing(${i.id})">Удалить</button>
+                        </td>
+                    </tr>
+                `).join('');
+        }
+
+        async function loadOutgoing() {
+            const res = await fetch('/api/Outgoing?_=' + Date.now());
+            const data = await res.json();
+            const tbody = document.querySelector('#outgoingTable tbody');
+            if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Нет расходов</td></tr>'; return; }
+            tbody.innerHTML = data.map(i => `
+                    <tr>
+                        <td>${escapeHtml(i.number)}</td>
+                        <td>${new Date(i.date).toLocaleDateString()}</td>
+                        <td>${escapeHtml(i.customer)}</td>
+                        <td>${escapeHtml(i.status)}</td>
+                        <td>
+                            ${i.status === 'Новый' ? `<button class="btn btn-success btn-sm" onclick="pickOrder(${i.id})">Собрать</button>` : ''}
+                            ${i.status === 'Собран' ? `<button class="btn btn-primary btn-sm" onclick="shipOrder(${i.id})">Отгрузить</button>` : ''}
+                            <button class="btn btn-danger btn-sm" onclick="deleteOutgoing(${i.id})">Удалить</button>
+                        </td>
+                    </tr>
+                `).join('');
+        }
+
+        async function updateProductSelects() {
+            const opts = productsList.map(p => `<option value="${p.id}">${escapeHtml(p.name)} (${p.sku}) - ${p.currentStock} шт.</option>`).join('');
+            document.querySelectorAll('.product-select').forEach(s => { s.innerHTML = '<option value="">-- Выберите товар --</option>' + opts; });
+        }
+
+        async function addUser() {
+            const data = { username: document.getElementById('userLogin').value, password: document.getElementById('userPass').value, fullName: document.getElementById('userFullname').value, role: document.getElementById('userRoleSelect').value };
+            if (!data.username || !data.password || !data.fullName) { showMessage('Заполните все поля', 'error'); return; }
+            await fetch('/api/Auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            await loadAllDataSilent();
+            document.getElementById('userLogin').value = ''; document.getElementById('userPass').value = ''; document.getElementById('userFullname').value = '';
+            showMessage('✅ Пользователь создан', 'success');
+        }
+
+        async function addProduct() {
+            const data = { sku: document.getElementById('prodSku').value, name: document.getElementById('prodName').value, category: document.getElementById('prodCategory').value, price: parseFloat(document.getElementById('prodPrice').value), minStock: parseInt(document.getElementById('prodMinStock').value) };
+            if (!data.sku || !data.name || !data.price) { showMessage('Заполните артикул, название и цену', 'error'); return; }
+            await fetch('/api/Products', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            await loadAllDataSilent();
+            document.getElementById('prodSku').value = ''; document.getElementById('prodName').value = ''; document.getElementById('prodCategory').value = ''; document.getElementById('prodPrice').value = '';
+            showMessage('✅ Товар добавлен', 'success');
+        }
+
+        async function addCell() {
+            const data = { code: document.getElementById('cellCode').value, zone: document.getElementById('cellZone').value, maxCapacity: parseInt(document.getElementById('cellCapacity').value) };
+            if (!data.code) { showMessage('Введите код ячейки', 'error'); return; }
+            await fetch('/api/Cells', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            await loadAllDataSilent();
+            document.getElementById('cellCode').value = '';
+            showMessage('✅ Ячейка добавлена', 'success');
+        }
+
+        async function deleteProduct(id) { if (confirm('Удалить товар?')) { await fetch(`/api/Products/${id}`, { method: 'DELETE' }); await loadAllDataSilent(); showMessage('✅ Товар удален', 'success'); } }
+        async function deleteUser(id) { if (confirm('Удалить пользователя?')) { await fetch(`/api/Admin/users/${id}`, { method: 'DELETE' }); await loadAllDataSilent(); showMessage('✅ Пользователь удален', 'success'); } }
+        async function deleteIncoming(id) { if (confirm('Удалить приходную накладную?')) { await fetch(`/api/Incoming/${id}`, { method: 'DELETE' }); await loadAllDataSilent(); showMessage('✅ Накладная удалена', 'success'); } }
+        async function deleteOutgoing(id) { if (confirm('Удалить расходную накладную?')) { await fetch(`/api/Outgoing/${id}`, { method: 'DELETE' }); await loadAllDataSilent(); showMessage('✅ Накладная удалена', 'success'); } }
+
+        async function pickOrder(id) { const res = await fetch(`/api/Outgoing/${id}/pick`, { method: 'POST' }); if (res.ok) { await loadAllDataSilent(); showMessage('✅ Заказ собран', 'success'); } else showMessage('❌ Недостаточно товара', 'error'); }
+        async function shipOrder(id) { await fetch(`/api/Outgoing/${id}/ship`, { method: 'POST' }); await loadAllDataSilent(); showMessage('✅ Заказ отгружен', 'success'); }
+
+        function addReceiveItem() {
+            const div = document.createElement('div'); div.className = 'receive-item';
+            div.innerHTML = `<select class="product-select" style="flex:2"></select><input type="number" placeholder="Кол-во" class="receive-qty"><input type="number" placeholder="Цена" class="receive-price"><button class="remove-btn" onclick="this.parentElement.remove()">✕</button>`;
+            document.getElementById('receiveItemsList').appendChild(div);
+            updateProductSelects();
+        }
+        function addOrderItem() {
+            const div = document.createElement('div'); div.className = 'order-item';
+            div.innerHTML = `<select class="product-select" style="flex:2"></select><input type="number" placeholder="Кол-во" class="order-qty"><button class="remove-btn" onclick="this.parentElement.remove()">✕</button>`;
+            document.getElementById('orderItemsList').appendChild(div);
+            updateProductSelects();
+        }
+
+        async function submitReceive() {
+            const items = [];
+            document.querySelectorAll('.receive-item').forEach(item => {
+                const pid = item.querySelector('.product-select').value;
+                const qty = item.querySelector('.receive-qty').value;
+                const price = item.querySelector('.receive-price').value;
+                if (pid && qty && parseInt(qty) > 0) items.push({ productId: parseInt(pid), quantity: parseInt(qty), price: parseFloat(price) || 0 });
+            });
+            const supplier = document.getElementById('supplierName').value;
+            if (items.length === 0) { showMessage('Добавьте позиции', 'error'); return; }
+            if (!supplier) { showMessage('Введите поставщика', 'error'); return; }
+            await fetch('/api/Incoming/receive', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ supplier, userId: currentUser.id, items }) });
+            await loadAllDataSilent();
+            document.getElementById('supplierName').value = '';
+            document.getElementById('receiveItemsList').innerHTML = '';
+            showMessage('✅ Приход оформлен', 'success');
+        }
+
+        async function submitOrder() {
+            const items = [];
+            document.querySelectorAll('.order-item').forEach(item => {
+                const pid = item.querySelector('.product-select').value;
+                const qty = item.querySelector('.order-qty').value;
+                if (pid && qty && parseInt(qty) > 0) items.push({ productId: parseInt(pid), quantity: parseInt(qty) });
+            });
+            const customer = document.getElementById('customerName').value;
+            if (items.length === 0) { showMessage('Добавьте товары', 'error'); return; }
+            if (!customer) { showMessage('Введите клиента', 'error'); return; }
+            await fetch('/api/Outgoing/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customer, userId: currentUser.id, items }) });
+            await loadAllDataSilent();
+            document.getElementById('customerName').value = '';
+            document.getElementById('orderItemsList').innerHTML = '';
+            showMessage('✅ Заказ создан', 'success');
+        }
+
+        async function exportProducts() {
+            let csv = "\uFEFFID;Артикул;Наименование;Категория;Цена;Остаток;Статус\n";
+            productsList.forEach(p => {
+                const status = p.currentStock <= p.minStock ? 'Критический' : 'Норма';
+                csv += `${p.id};${p.sku};${p.name};${p.category || ''};${p.price};${p.currentStock};${status}\n`;
+            });
+            downloadCSV(csv, 'products.csv');
+            showMessage('✅ Экспорт товаров выполнен', 'success');
+        }
+
+        async function exportIncoming() {
+            const res = await fetch('/api/Incoming');
+            const data = await res.json();
+            let csv = "\uFEFFНомер;Дата;Поставщик;Статус\n";
+            data.forEach(i => {
+                csv += `${i.number};${new Date(i.date).toLocaleDateString()};${i.supplier};${i.status}\n`;
+            });
+            downloadCSV(csv, 'incoming.csv');
+            showMessage('✅ Экспорт приходов выполнен', 'success');
+        }
+
+        async function exportOutgoing() {
+            const res = await fetch('/api/Outgoing');
+            const data = await res.json();
+            let csv = "\uFEFFНомер;Дата;Клиент;Статус\n";
+            data.forEach(i => {
+                csv += `${i.number};${new Date(i.date).toLocaleDateString()};${i.customer};${i.status}\n`;
+            });
+            downloadCSV(csv, 'outgoing.csv');
+            showMessage('✅ Экспорт расходов выполнен', 'success');
+        }
+
+        function downloadCSV(csv, name) { const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = name; link.click(); URL.revokeObjectURL(link.href); }
+        function showMessage(msg, type) { const div = document.getElementById('message'); div.textContent = msg; div.className = `message ${type}`; div.style.display = 'block'; setTimeout(() => div.style.display = 'none', 3000); }
+        function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+        function showSection(s) { document.querySelectorAll('.section').forEach(el => el.classList.remove('active')); document.getElementById(s).classList.add('active'); document.querySelectorAll('.sidebar-menu li').forEach(btn => btn.classList.remove('active')); if (event?.target) event.target.classList.add('active'); }
+        function logout() { if (autoRefreshInterval) clearInterval(autoRefreshInterval); localStorage.removeItem('user'); window.location.href = '/index.html'; }
+
+        init();
+    </script>
+</body>
+</html>
